@@ -11,7 +11,6 @@ BluetoothSerial SerialBT;
 
 int IRSensor = 4;
 int buttonPin = 5;
-
 float length1 = 0.282;
 float speed1 = 0.0;
 
@@ -22,6 +21,11 @@ bool earlyDetect = false;
 unsigned long startMicros = 0;
 unsigned long stopMicros = 0;
 unsigned long elapsedMicros = 0;
+bool initialReadingTaken = false;
+
+float initialAngle = 0.0;
+float hitAngle = 0.0;
+float movedAngle = 0.0;
 
 const int MPU_addr = 0x68;
 int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
@@ -29,18 +33,12 @@ int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 int minVal = 265;
 int maxVal = 402;
 
-bool initialReadingTaken = false;
-
 double x;
 double y;
 double z;
 
-float initialAngle = 0.0;
-float hitAngle = 0.0;
-float movedAngle = 0.0;
-
-void setup() {
-
+void setup()
+{
   pinMode (IRSensor, INPUT);
   pinMode(buttonPin, INPUT_PULLUP);
 
@@ -50,35 +48,19 @@ void setup() {
   Wire.write(0);
   Wire.endTransmission(true);
 
+  Serial.println("");
+
   Serial.begin(115200);
   Serial.println();
 
   SerialBT.begin("DRIVR");
 }
 
-void loop() {
-
+void loop()
+{
   int statusSensor = digitalRead (IRSensor);
   int buttonValue = digitalRead(buttonPin);
 
-  if (buttonValue == LOW) {
-
-    readyStart = true;
-    readyStop = false;
-    earlyDetect = false;
-
-    initialReadingTaken = false;
-
-    startMicros = 0;
-    stopMicros = 0;
-    elapsedMicros = 0;
-
-    initialAngle = 0.0;
-    hitAngle = 0.0;
-    movedAngle = 0.0;
-
-    SerialBT.println("Button Pressed");
-  }
 
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3B);
@@ -97,10 +79,24 @@ void loop() {
   y = RAD_TO_DEG * (atan2(-xAng, -zAng) + PI);
   z = RAD_TO_DEG * (atan2(-yAng, -xAng) + PI);
 
-  if (initialReadingTaken == false)
-  {
+  if (buttonValue == LOW) {
+
+    readyStart = true;
+    readyStop = false;
+    earlyDetect = false;
+
+    startMicros = 0;
+    stopMicros = 0;
+    elapsedMicros = 0;
+
     initialAngle = y;
-    initialReadingTaken = true;
+    SerialBT.print("initial Angle : ");
+    SerialBT.println(initialAngle);
+    
+    hitAngle = 0.0;
+    movedAngle = 0.0;
+
+    SerialBT.println("Button Pressed");
   }
 
   if (statusSensor == 1)                                  //doesn't sense object
@@ -114,22 +110,20 @@ void loop() {
     if (readyStop == true && earlyDetect == true)
     {
       stopMicros = micros();
-      SerialBT.print("Stop: ");
-      SerialBT.println(stopMicros);
       readyStop = false;
 
       elapsedMicros = stopMicros - startMicros;
-      SerialBT.print("Elapsed Micros: ");
-      SerialBT.println(elapsedMicros);
 
       speed1 = ((length1 / elapsedMicros) * 1000000) * 2.237;
 
-      SerialBT.print("Speed(mph) : ");
-      SerialBT.println(speed1);
-      
+      SerialBT.print(speed1);
+      SerialBT.println(" mph");
+
       hitAngle = y;
       movedAngle = hitAngle - initialAngle;
 
+      SerialBT.print("hit Angle : ");
+      SerialBT.println(hitAngle);
       SerialBT.print("Moved Angle : ");
       SerialBT.println(movedAngle);
     }
@@ -144,8 +138,6 @@ void loop() {
     if (readyStart == true && earlyDetect == true)
     {
       startMicros = micros();
-      SerialBT.print("Start: ");
-      SerialBT.println(startMicros);
       readyStop = true;
       readyStart = false;
     }
