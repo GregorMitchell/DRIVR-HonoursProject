@@ -116,14 +116,12 @@ void loop()
 
       speed1 = ((length1 / elapsedMicros) * 1000000) * 2.237;
 
-      Serial.print(speed1);
-      Serial.println(" mph");
+      Serial.print("Speed(mph) : ");
+      Serial.println(speed1);
 
       hitAngle = y;
       movedAngle = hitAngle - initialAngle;
 
-      Serial.print("hit Angle : ");
-      Serial.println(hitAngle);
       Serial.print("Moved Angle : ");
       Serial.println(movedAngle);
     }

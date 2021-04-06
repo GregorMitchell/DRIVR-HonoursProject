@@ -8,23 +8,21 @@ public class BallBirdseyeMovement : MonoBehaviour
 {
     private float angle;
 
-    private GameObject normalBall;
-    private BallNormalMovement newBallNormalMovement;
+    private SceneManagement newSceneManagement;
+    private GameObject player;
 
     private Animator anim;
 
     public Transform ballCamera;
     void Start()
     {
-        normalBall = GameObject.Find("BallNormal(Clone)");
-        newBallNormalMovement = normalBall.GetComponent<BallNormalMovement>();
+        player = GameObject.Find("Player");
+        newSceneManagement = player.GetComponent<SceneManagement>();
 
         anim = GetComponent<Animator>();
 
-        angle = newBallNormalMovement.angle;
+        angle = newSceneManagement.angle;
         Debug.Log("Birdseye Angle: " + angle);
-
-        Destroy(normalBall);
     }
 
     void Update()

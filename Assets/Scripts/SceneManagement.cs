@@ -11,9 +11,14 @@ public class SceneManagement : MonoBehaviour
     public Transform ballBirdseyeDrop;
     public GameObject ballNormalPrefab;
     public GameObject ballBirdseyePrefab;
+
+    private GameObject ballBirdseye;
+
     public float speed = 0f;
     public float distance = 0f;
     public float angle = 0f;
+
+    private bool buttonCanBePressed = true;
 
     private string serialLine;
 
@@ -30,7 +35,6 @@ public class SceneManagement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         if (sp.IsOpen)
         {
             try
@@ -39,8 +43,11 @@ public class SceneManagement : MonoBehaviour
 
                 if (serialLine.Contains("Button Pressed"))
                 {
-                    //sp.Close();
-                    //Swing();
+                    if (buttonCanBePressed == true)
+                    {
+                        Swing();
+                        buttonCanBePressed = false;
+                    }
                 }
 
                 if (serialLine.Contains("Speed(mph)"))
@@ -80,19 +87,30 @@ public class SceneManagement : MonoBehaviour
             }
         }
 
-        if (Input.GetButtonUp("Jump"))
+        if (ballBirdseye)
         {
-            Swing();
+            if (ballBirdseye.transform.position.y == 61.5)
+            {
+                StartCoroutine(DestroyBirdseye());
+            }
         }
+    }
+    IEnumerator DestroyBirdseye()
+    {
+        yield return new WaitForSeconds(1);
+        Destroy(ballBirdseye);
+        buttonCanBePressed = true;
     }
 
     void Swing()
     {
+        speed = 0;
         Instantiate(ballNormalPrefab, ballNormalDrop.position, ballNormalDrop.rotation);
     }
 
     public void SwitchCameras()
     {
         Instantiate(ballBirdseyePrefab, ballBirdseyeDrop.position, ballBirdseyeDrop.rotation);
+        ballBirdseye = GameObject.Find("BallBirdseye(Clone)");
     }
 }
