@@ -13,7 +13,6 @@ public class BallNormalMovement : MonoBehaviour
     private GameObject player;
     private float speed = 0f;
     private float distance = 0f;
-    public float angle = 0f;
     private bool hit = false;
 
     private Rigidbody2D rigidBody;
@@ -30,17 +29,13 @@ public class BallNormalMovement : MonoBehaviour
     void Update()
     {
         speed = newSceneManagement.speed;
-        angle = newSceneManagement.angle;
         distance = newSceneManagement.distance;
 
-        if (Input.GetButtonUp("Fire1"))
+        if (hit == false && speed > 0)
         {
-            if (hit == false)
-            {
-                rigidBody.velocity = new Vector2(speed, rigidBody.velocity.y);
-                rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpSpeed);
-                hit = true;
-            }
+            rigidBody.velocity = new Vector2(speed, rigidBody.velocity.y);
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpSpeed);
+            hit = true;
         }
     }
 
@@ -52,7 +47,13 @@ public class BallNormalMovement : MonoBehaviour
 
         if (hit == true)
         {
-            newSceneManagement.SwitchCameras();
+            StartCoroutine(CameraSwitch());
         }
+    }
+
+    IEnumerator CameraSwitch()
+    {
+        yield return new WaitForSeconds(1);
+        newSceneManagement.SwitchCameras();
     }
 }
