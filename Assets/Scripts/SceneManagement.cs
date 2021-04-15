@@ -11,11 +11,14 @@ public class SceneManagement : MonoBehaviour
     public Transform ballBirdseyeDrop;
     public GameObject ballNormalPrefab;
     public GameObject ballBirdseyePrefab;
-
     private GameObject ballBirdseye;
 
+    private Animator anim;
+
     public float speed = 0f;
+    public float speedtemp = 0f;
     public float distance = 0f;
+    public float distancetemp = 0f;
     public float angle = 0f;
 
     private bool buttonCanBePressed = true;
@@ -30,11 +33,14 @@ public class SceneManagement : MonoBehaviour
     {
         sp.Open();
         sp.ReadTimeout = 1;
+
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
+
         if (sp.IsOpen)
         {
             try
@@ -45,7 +51,7 @@ public class SceneManagement : MonoBehaviour
                 {
                     if (buttonCanBePressed == true)
                     {
-                        Swing();
+                        DropBall();
                         buttonCanBePressed = false;
                     }
                 }
@@ -54,9 +60,8 @@ public class SceneManagement : MonoBehaviour
                 {
                     serialLine = serialLine.Substring(serialLine.IndexOf(":") + 1);
 
-                    speed = float.Parse(serialLine, CultureInfo.InvariantCulture.NumberFormat);
-
-                    distance = 3.16f * speed - 50.5f;
+                    speedtemp = float.Parse(serialLine, CultureInfo.InvariantCulture.NumberFormat);
+                    distancetemp = 3.16f * speed - 50.5f;
 
                     Debug.Log("Speed: " + speed);
 
@@ -68,6 +73,9 @@ public class SceneManagement : MonoBehaviour
                     {
                         Debug.Log("Distance: " + distance);
                     }
+
+                    anim.SetBool("isHitting", true);
+                    StartCoroutine(Swing());
                 }
 
                 if (serialLine.Contains("Moved Angle"))
@@ -95,14 +103,23 @@ public class SceneManagement : MonoBehaviour
             }
         }
     }
+
+    IEnumerator Swing()
+    {
+        yield return new WaitForSeconds(1);
+        speed = speedtemp;
+        distance = distancetemp;
+    }
+
     IEnumerator DestroyBirdseye()
     {
         yield return new WaitForSeconds(1);
         Destroy(ballBirdseye);
         buttonCanBePressed = true;
+        anim.SetBool("isHitting", false);
     }
 
-    void Swing()
+    void DropBall()
     {
         speed = 0;
         Instantiate(ballNormalPrefab, ballNormalDrop.position, ballNormalDrop.rotation);

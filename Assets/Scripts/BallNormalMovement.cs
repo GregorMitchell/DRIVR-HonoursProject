@@ -17,7 +17,6 @@ public class BallNormalMovement : MonoBehaviour
 
     private Rigidbody2D rigidBody;
 
-    // Use this for initialization
     void Start()
     {
         rigidBody = GetComponent<Rigidbody2D>();
@@ -25,7 +24,6 @@ public class BallNormalMovement : MonoBehaviour
         newSceneManagement = player.GetComponent<SceneManagement>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         speed = newSceneManagement.speed;
