@@ -6,9 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Menu.unity
+    guid: 3d6d00dfd0b2902449e14906a6859839
+  - enabled: 1
     path: Assets/Scenes/DrivingRange.unity
     guid: a7353f825b4054046b2c0ef765728acc
-  - enabled: 1
-    path: Assets/Scenes/DrivingRangeBirdseye.unity
-    guid: af7bd35e7c9c8324e8eced43195fd76e
   m_configObjects: {}
