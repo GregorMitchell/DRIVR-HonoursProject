@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO.Ports;
 using UnityEngine;
+using TMPro;
 
 public class SceneManagement : MonoBehaviour
 {
@@ -13,12 +14,17 @@ public class SceneManagement : MonoBehaviour
     public GameObject ballBirdseyePrefab;
     private GameObject ballBirdseye;
 
+
+    public TextMeshProUGUI speedText;
+    public TextMeshProUGUI distanceText;
+    public TextMeshProUGUI angleText;
+
     private Animator anim;
 
     public float speed = 0f;
-    public float speedtemp = 0f;
+    public float speedTemp = 0f;
     public float distance = 0f;
-    public float distancetemp = 0f;
+    public float distanceTemp = 0f;
     public float angle = 0f;
 
     private bool buttonCanBePressed = true;
@@ -40,7 +46,6 @@ public class SceneManagement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         if (sp.IsOpen)
         {
             try
@@ -60,18 +65,18 @@ public class SceneManagement : MonoBehaviour
                 {
                     serialLine = serialLine.Substring(serialLine.IndexOf(":") + 1);
 
-                    speedtemp = float.Parse(serialLine, CultureInfo.InvariantCulture.NumberFormat);
-                    distancetemp = 3.16f * speed - 50.5f;
+                    speedTemp = float.Parse(serialLine, CultureInfo.InvariantCulture.NumberFormat);
+                    distanceTemp = 3.16f * speed - 50.5f;
 
-                    Debug.Log("Speed: " + speed);
+                    speedText.text = "Speed: " + speedTemp.ToString() + "mph";
 
                     if (distance <= 0)
                     {
-                        Debug.Log("Swing too slow");
+                        distanceText.text = "Distance: too slow";
                     }
                     else
                     {
-                        Debug.Log("Distance: " + distance);
+                        distanceText.text = "Distance: " + distanceTemp.ToString() + "yards";
                     }
 
                     anim.SetBool("isHitting", true);
@@ -84,7 +89,7 @@ public class SceneManagement : MonoBehaviour
 
                     angle = float.Parse(serialLine, CultureInfo.InvariantCulture.NumberFormat);
 
-                    Debug.Log("Angle: " + angle);
+                    angleText.text = "Angle: " + angle.ToString() + "°";
 
                 }
 
@@ -107,8 +112,8 @@ public class SceneManagement : MonoBehaviour
     IEnumerator Swing()
     {
         yield return new WaitForSeconds(1);
-        speed = speedtemp;
-        distance = distancetemp;
+        speed = speedTemp;
+        distance = distanceTemp;
     }
 
     IEnumerator DestroyBirdseye()
