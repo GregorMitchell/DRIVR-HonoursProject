@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO.Ports;
 using UnityEngine;
+using TMPro;
 
 public class SceneManagement : MonoBehaviour
 {
@@ -11,11 +12,19 @@ public class SceneManagement : MonoBehaviour
     public Transform ballBirdseyeDrop;
     public GameObject ballNormalPrefab;
     public GameObject ballBirdseyePrefab;
-
     private GameObject ballBirdseye;
 
+
+    public TextMeshProUGUI speedText;
+    public TextMeshProUGUI distanceText;
+    public TextMeshProUGUI angleText;
+
+    private Animator anim;
+
     public float speed = 0f;
+    public float speedTemp = 0f;
     public float distance = 0f;
+    public float distanceTemp = 0f;
     public float angle = 0f;
 
     private bool buttonCanBePressed = true;
@@ -30,6 +39,8 @@ public class SceneManagement : MonoBehaviour
     {
         sp.Open();
         sp.ReadTimeout = 1;
+
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -45,7 +56,7 @@ public class SceneManagement : MonoBehaviour
                 {
                     if (buttonCanBePressed == true)
                     {
-                        Swing();
+                        DropBall();
                         buttonCanBePressed = false;
                     }
                 }
@@ -54,20 +65,22 @@ public class SceneManagement : MonoBehaviour
                 {
                     serialLine = serialLine.Substring(serialLine.IndexOf(":") + 1);
 
-                    speed = float.Parse(serialLine, CultureInfo.InvariantCulture.NumberFormat);
+                    speedTemp = float.Parse(serialLine, CultureInfo.InvariantCulture.NumberFormat);
+                    distanceTemp = 3.16f * speed - 50.5f;
 
-                    distance = 3.16f * speed - 50.5f;
-
-                    Debug.Log("Speed: " + speed);
+                    speedText.text = "Speed: " + speedTemp.ToString() + "mph";
 
                     if (distance <= 0)
                     {
-                        Debug.Log("Swing too slow");
+                        distanceText.text = "Distance: too slow";
                     }
                     else
                     {
-                        Debug.Log("Distance: " + distance);
+                        distanceText.text = "Distance: " + distanceTemp.ToString() + "yards";
                     }
+
+                    anim.SetBool("isHitting", true);
+                    StartCoroutine(Swing());
                 }
 
                 if (serialLine.Contains("Moved Angle"))
@@ -76,7 +89,7 @@ public class SceneManagement : MonoBehaviour
 
                     angle = float.Parse(serialLine, CultureInfo.InvariantCulture.NumberFormat);
 
-                    Debug.Log("Angle: " + angle);
+                    angleText.text = "Angle: " + angle.ToString() + "°";
 
                 }
 
@@ -95,14 +108,23 @@ public class SceneManagement : MonoBehaviour
             }
         }
     }
+
+    IEnumerator Swing()
+    {
+        yield return new WaitForSeconds(1);
+        speed = speedTemp;
+        distance = distanceTemp;
+    }
+
     IEnumerator DestroyBirdseye()
     {
         yield return new WaitForSeconds(1);
         Destroy(ballBirdseye);
         buttonCanBePressed = true;
+        anim.SetBool("isHitting", false);
     }
 
-    void Swing()
+    void DropBall()
     {
         speed = 0;
         Instantiate(ballNormalPrefab, ballNormalDrop.position, ballNormalDrop.rotation);

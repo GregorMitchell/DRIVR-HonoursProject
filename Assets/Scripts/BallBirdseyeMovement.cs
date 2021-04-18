@@ -48,10 +48,5 @@ public class BallBirdseyeMovement : MonoBehaviour
         {
             anim.SetBool("isFarRight", true);
         }
-
-        if (Input.GetButtonUp("Fire2"))
-        {
-            Destroy(gameObject);
-        }
     }
 }
