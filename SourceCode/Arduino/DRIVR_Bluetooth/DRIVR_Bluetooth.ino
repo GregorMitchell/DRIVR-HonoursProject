@@ -1,5 +1,3 @@
-//https://www.instructables.com/How-to-Measure-Angle-With-MPU-6050GY-521/
-
 #include<Wire.h>
 #include "BluetoothSerial.h"
 
@@ -7,8 +5,10 @@
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
+//Instance of BluetoothSerial class
 BluetoothSerial SerialBT;
 
+//variable declarations
 int IRSensor = 4;
 int buttonPin = 5;
 float length1 = 0.282;
@@ -39,29 +39,31 @@ double z;
 
 void setup()
 {
+  //setup of IRSensor and button
   pinMode (IRSensor, INPUT);
   pinMode(buttonPin, INPUT_PULLUP);
 
+  //MPU6050 gyroscope code adapted from here
+  //https://www.instructables.com/How-to-Measure-Angle-With-MPU-6050GY-521/
   Wire.begin();
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x6B);
   Wire.write(0);
   Wire.endTransmission(true);
 
-  Serial.println("");
-
-  Serial.begin(115200);
-  Serial.println();
-
+  //Begin bluetooth connection
   SerialBT.begin("DRIVR");
 }
 
 void loop()
 {
+  //button and IRSensor values read in
   int statusSensor = digitalRead (IRSensor);
   int buttonValue = digitalRead(buttonPin);
 
 
+  //MPU6050 gyroscope code adapted from here
+  //https://www.instructables.com/How-to-Measure-Angle-With-MPU-6050GY-521/
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3B);
   Wire.endTransmission(false);
@@ -79,6 +81,8 @@ void loop()
   y = RAD_TO_DEG * (atan2(-xAng, -zAng) + PI);
   z = RAD_TO_DEG * (atan2(-yAng, -xAng) + PI);
 
+  //if the button is pressed, reset everything
+  //read in initial angle
   if (buttonValue == LOW) {
 
     readyStart = true;
@@ -98,15 +102,17 @@ void loop()
 
     SerialBT.println("Button Pressed");
   }
-
-  if (statusSensor == 1)                                  //doesn't sense object
+  //if it doesn't sense the object
+  if (statusSensor == 1)
   {
+    //once the club's backkswing has left the box, then get ready to read in time
     if (earlyDetect == false)
     {
       SerialBT.println("early detecting...finished!");
       earlyDetect = true;
     }
-
+    //if the club has pased the box on the swing, then stop the timer, calculate the speed and output
+    //also calculates the angle and outputs
     if (readyStop == true && earlyDetect == true)
     {
       stopMicros = micros();
@@ -128,13 +134,16 @@ void loop()
       SerialBT.println(movedAngle);
     }
   }
-  else if (statusSensor == 0)                             //senses object
+  //if it senses the object
+  else if (statusSensor == 0)
   {
+    //if it is an early detect then ignore
     if (earlyDetect == false)
     {
       SerialBT.println("detecting...early detect");
     }
 
+    //if the club is ready, begin the timer
     if (readyStart == true && earlyDetect == true)
     {
       startMicros = micros();
